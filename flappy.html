@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contoso Flies</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #70c5ce;
+        overflow: hidden;
+    }
+    #game {
+        position: relative;
+        width: 400px;
+        height: 600px;
+        margin: 50px auto;
+        background-color: #fff;
+        border: 2px solid #000;
+    }
+    #bird {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        background-color: #f00;
+    }
+    .pipe {
+        position: absolute;
+        width: 60px;
+        background-color: #333;
+    }
+    #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 24px;
+    }
+    #logo {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #000;
+    }
+</style>
+</head>
+<body>
+<div id="logo">Contoso Flies</div>
+<div id="game">
+    <div id="bird"></div>
+</div>
+<div id="score">Score: 0</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const bird = document.getElementById("bird");
+        const game = document.getElementById("game");
+        const scoreDisplay = document.getElementById("score");
+        let birdTop = 300;
+        let gravity = 0.5; // Adjusted gravity for acceleration
+        let isGameOver = false;
+        let score = 0;
+        let lastPipeTime = 0; // Track the time of the last generated pipe
+
+        function jump() {
+            if (birdTop > 0) {
+                birdTop -= 60;
+            }
+        }
+
+        function draw() {
+            if (!isGameOver) {
+                bird.style.top = birdTop + "px";
+                birdTop += gravity;
+
+                const currentTime = new Date().getTime();
+                // Generate pipes every 1.5 seconds
+                if (currentTime - lastPipeTime > 1500 && Math.random() < 0.01) {
+                    const pipeGap = 200; // Adjusted pipe gap
+                    const pipeHeight = Math.random() * (game.clientHeight - pipeGap);
+                    createPipe(pipeHeight, pipeGap);
+                    lastPipeTime = currentTime; // Update last pipe time
+                }
+
+                // Move pipes
+                const pipes = document.querySelectorAll(".pipe");
+                pipes.forEach(pipe => {
+                    const pipeLeft = parseFloat(pipe.style.left);
+                    pipe.style.left = (pipeLeft - 1) + "px"; // Adjusted pipe speed
+
+                    // Check collision
+                    if (birdTop < 0 || birdTop > game.clientHeight - 40 ||
+                        (birdTop + 40 > pipe.clientHeight &&
+                         birdTop < pipe.clientHeight + parseFloat(pipe.style.top) &&
+                         pipeLeft < 90 && pipeLeft > 10)) {
+                        gameOver();
+                    }
+
+                    // Update score
+                    if (pipeLeft + 60 < 50 && pipeLeft + 60 > 48 && pipeLeft + 60 > 0) {
+                        score++;
+                        scoreDisplay.textContent = "Score: " + score;
+                    }
+
+                    // Remove pipes when they go out of the game area
+                    if (pipeLeft < -60) {
+                        pipe.remove();
+                    }
+                });
+
+                if (!isGameOver) {
+                    requestAnimationFrame(draw);
+                }
+            }
+        }
+
+        function createPipe(height, gap) {
+            const pipeUp = document.createElement("div");
+            pipeUp.classList.add("pipe");
+            pipeUp.style.left = "400px";
+            pipeUp.style.top = "0";
+            pipeUp.style.height = height + "px";
+            game.appendChild(pipeUp);
+
+            const pipeDown = document.createElement("div");
+            pipeDown.classList.add("pipe");
+            pipeDown.style.left = "400px";
+            pipeDown.style.top = height + gap + "px"; // Gap between pipes
+            pipeDown.style.height = (game.clientHeight - height - gap) + "px";
+            game.appendChild(pipeDown);
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            alert("Game Over! Your score: " + score);
+            location.reload(); // Restart the game
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.code === "Space" || event.code === "ArrowUp") {
+                jump();
+            }
+        });
+
+        draw();
+    });
+</script>
+</body>
+</html>

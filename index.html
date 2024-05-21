@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotating Contoso Fashion Text</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Set up scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create 3D text
+        const fontLoader = new THREE.FontLoader();
+        fontLoader.load('https://cdn.jsdelivr.net/npm/three/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textGeometry = new THREE.TextGeometry('Contoso Fashion', {
+                font: font,
+                size: 0.5,
+                height: 0.1,
+                curveSegments: 12,
+                bevelEnabled: false
+            });
+            const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+            scene.add(textMesh);
+
+            // Set initial position of the text
+            textMesh.position.set(0, 0, 0);
+
+            // Animation loop
+            const animate = function () {
+                requestAnimationFrame(animate);
+
+                // Rotate the text horizontally
+                textMesh.rotation.y += 0.01;
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+        });
+
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // Set initial camera position
+        camera.position.z = 5;
+    </script>
+</body>
+</html>
